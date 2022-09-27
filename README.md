@@ -1,4 +1,4 @@
-# muffi-bot
+# Muffi-Bot
 
 Open Source Discord.js Bot
 
