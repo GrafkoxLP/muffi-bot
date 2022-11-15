@@ -1,13 +1,11 @@
-// Load all files and conntect bot
+const { Client, ActivityType, GatewayIntentBits, Collection, ActionRow, EmbedBuilder, Routes } = require("discord.js")
+const { REST } = require('@discordjs/rest');
 require("dotenv").config()
-const fs = require("fs")
-const { Client, ActivityType, GatewayIntentBits, Collection, ActionRow, EmbedBuilder } = require("discord.js")
-const { InteractionType } = require("discord-api-types/v9")
-const welcome_channel = '940232290628419649'
-const log_channel = '940232291488268366'
-const prefix = '!';
-const { default: SpotifyPlugin } = require("@distube/spotify")
-const { YtDlpPlugin } = require("@distube/yt-dlp")
+
+// Import all the commands
+const pingCommand = require("./commands/ping.js")
+const helloCommand = require("./commands/hello.js")
+
 const client = new Client({intents: [
 	GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
@@ -25,44 +23,21 @@ const client = new Client({intents: [
     GatewayIntentBits.DirectMessageReactions,
     GatewayIntentBits.DirectMessageTyping,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildScheduledEvents]})
-client.commands = new Collection()
-client.login(process.env.DISCORD_BOT_TOKEN)
-const commandFiles = fs.readdirSync("./src/commands").filter(file => file.endsWith(".js"))
-commandFiles.forEach(commandFile => {
-    const command = require(`./commands/${commandFile}`)
-    client.commands.set(command.data.name, command)
-})
-client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isCommand()) return
-    const command = client.commands.get(interaction.commandName)
-    if (command) {
-        try {
-            await command.execute(interaction)
-        } catch (error) {
-            console.error(error)
-            
-            if(interaction.deferred || interaction.replied) {
-                interaction.editReply({content: "There was an error while executing this command!", ephemeral: true});
-                console.log("Fehler beim Ausführen eines Befehls")
-            } else {
-                interaction.reply({content: "There was an error while executing this command!", ephemeral: true});
-                console.log("Fehler beim Ausführen eines Befehls")
-            }
-        }
-    }
-})
+    GatewayIntentBits.GuildScheduledEvents]});
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
+registerCommands();
+client.login(process.env.DISCORD_BOT_TOKEN);
 const statusArray = [
     {
-        name: "auf Dead City",
+        name: "mit (/) Commands",
         type: ActivityType.Playing,
         statusbar: "online"
     },
-    {
-        name: "!help | Dead City",
-        type: ActivityType.Playing,
-        statusbar: "online"
-    }
+    //{
+    //    name: "!help | Dead City",
+    //    type: ActivityType.Playing,
+    //    statusbar: "online"
+    //}
 ];
 async function pickPresence() {
     const option = Math.floor(Math.random() * statusArray.length);
@@ -76,18 +51,27 @@ async function pickPresence() {
     } catch (error) {
         console.error(error);
     }
-}
-client.once("ready", () => {
-    console.log("Bot ist online!")
-})
+};
 setInterval(pickPresence, 30 * 1000);
-client.on('guildMemberAdd', (member) => {
-    const message = "Hey <@" +member.user+ "> Herzlich willkommen auf **Dead City**! 🎉🤗\nGehe bitte zu <#940232290628419650> und bestätige sie bitte mit ✅.\nDu kannst dir außerdem in <#940232290628419652> eigene Rollen geben."
-    const channel = member.guild.channels.cache.get(welcome_channel)
-    channel.send(message)
-    member.send("Hey <@" +member.user+ ">! Das ganze Team von **Dead City** wünscht dich noch einmal herzlich willkommen auf unserem Server und wir wünschen dir viel Spaß.\nFalls du es noch nicht gesehen hast, um unserem Server zu joinen, gehe bitte zu <#940232290628419650> und bestätige unsere Regeln bitte mit ✅.\nBei Fragen kannst du unter <#940232291018473491> ein Ticket erstellen.")
-})
+client.on("ready", () => {
+    console.log("Bot is ready!");
+});
+async function registerCommands() {
+    const commands = [pingCommand, helloCommand];
+    try {
+        console.log('Started refreshing application (/) commands.');
 
+        await rest.put(
+            Routes.applicationGuildCommands(process.env.DISCORD_APPLICATION_ID, process.env.DEV_GUILD_ID), // Slash Commands for DEV Server
+            //Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID), //For Global Commands
+            { body: commands },
+        );
+
+        console.log('Successfully reloaded application (/) commands.');
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 
 // Message Logger
@@ -97,16 +81,13 @@ client.on('messageCreate', (message) => {
     console.log(message.createdAt.toDateString());
     console.log(message.author.tag);
     console.log('---------------------');
-})
+});
 
-
-// Command Handler
-client.on("messageCreate", (message) => {
-    if (!message.content.startsWith(prefix) || message.author.bot) return;
-
-    const args = message.content.slice(prefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
-
-    const messageArray = message.content.split(" ");
-    const argument = messageArray.slice(1);
-    const cmd = messageArray[0];
+client.on('interactionCreate', (interaction) => {
+    if (interaction.commandName === 'ping') {
+        interaction.reply({content: 'Pong!'});
+    }
+    if (interaction.commandName === 'hello') {
+        interaction.reply({content: 'Hello User!', ephemeral: true});
+    }
+});
