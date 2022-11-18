@@ -4,8 +4,7 @@ require("dotenv").config()
 
 // Import all the commands
 const pingCommand = require("./commands/ping.js")
-const helloCommand = require("./commands/hello.js")
-const kopfoderzahlCommand = require("./commands/headortail.js")
+const kopfoderzahlCommand = require("./commands/kopfoderzahl.js")
 
 const client = new Client({intents: [
 	GatewayIntentBits.Guilds,
@@ -58,7 +57,7 @@ client.on("ready", () => {
     console.log("Bot is ready!");
 });
 async function registerCommands() {
-    const commands = [pingCommand, helloCommand, kopfoderzahlCommand];
+    const commands = [pingCommand, kopfoderzahlCommand];
     try {
         console.log('Started refreshing application (/) commands.');
 
@@ -75,21 +74,11 @@ async function registerCommands() {
 }
 
 
-// Message Logger
-client.on('messageCreate', (message) => {
-    console.log('---------------------');
-    console.log('Message: ' + message.content);
-    console.log(message.createdAt.toDateString());
-    console.log(message.author.tag);
-    console.log('---------------------');
-});
 
+// Commands
 client.on('interactionCreate', (interaction) => {
     if (interaction.commandName === 'ping') {
-        interaction.reply({content: 'Pong!'});
-    }
-    if (interaction.commandName === 'hello') {
-        interaction.reply({content: 'Hello User!', ephemeral: true});
+        interaction.reply({content: `🏓 | Ping beträgt **${client.ws.ping} ms**!`, ephemeral: true});
     }
     if (interaction.commandName === 'kopfoderzahl') {
         const random = Math.floor(Math.random() * 2);

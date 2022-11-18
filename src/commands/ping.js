@@ -2,6 +2,6 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 const pingCommand = new SlashCommandBuilder()
     .setName("ping")
-    .setDescription("Replies with Pong!");
+    .setDescription("Zeigt dir den aktuellen Ping an");
 
 module.exports = pingCommand;
