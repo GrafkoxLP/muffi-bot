@@ -5,6 +5,7 @@ require("dotenv").config()
 // Import all the commands
 const pingCommand = require("./commands/ping.js")
 const helloCommand = require("./commands/hello.js")
+const kopfoderzahlCommand = require("./commands/headortail.js")
 
 const client = new Client({intents: [
 	GatewayIntentBits.Guilds,
@@ -57,13 +58,13 @@ client.on("ready", () => {
     console.log("Bot is ready!");
 });
 async function registerCommands() {
-    const commands = [pingCommand, helloCommand];
+    const commands = [pingCommand, helloCommand, kopfoderzahlCommand];
     try {
         console.log('Started refreshing application (/) commands.');
 
         await rest.put(
-            Routes.applicationGuildCommands(process.env.DISCORD_APPLICATION_ID, process.env.DEV_GUILD_ID), // Slash Commands for DEV Server
-            //Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID), //For Global Commands
+            //Routes.applicationGuildCommands(process.env.DISCORD_APPLICATION_ID, process.env.DEV_GUILD_ID), // Slash Commands for DEV Server
+            Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID), //For Global Commands
             { body: commands },
         );
 
@@ -89,5 +90,13 @@ client.on('interactionCreate', (interaction) => {
     }
     if (interaction.commandName === 'hello') {
         interaction.reply({content: 'Hello User!', ephemeral: true});
+    }
+    if (interaction.commandName === 'kopfoderzahl') {
+        const random = Math.floor(Math.random() * 2);
+        if (random == 0) {
+            interaction.reply({content: 'Kopf'});
+        } else {
+            interaction.reply({content: 'Zahl'});
+        }
     }
 });
