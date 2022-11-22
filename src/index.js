@@ -1,10 +1,11 @@
-const { Client, ActivityType, GatewayIntentBits, Collection, ActionRow, EmbedBuilder, Routes } = require("discord.js")
+const { Client, ActivityType, GatewayIntentBits, Collection, ActionRow, EmbedBuilder, Routes, PermissionsBitField } = require("discord.js")
 const { REST } = require('@discordjs/rest');
 require("dotenv").config()
 
 // Import all the commands
 const pingCommand = require("./commands/ping.js")
 const kopfoderzahlCommand = require("./commands/kopfoderzahl.js")
+const kickCommand = require("./commands/kick.js")
 
 const client = new Client({intents: [
 	GatewayIntentBits.Guilds,
@@ -57,7 +58,7 @@ client.on("ready", () => {
     console.log("Bot is ready!");
 });
 async function registerCommands() {
-    const commands = [pingCommand, kopfoderzahlCommand];
+    const commands = [pingCommand, kopfoderzahlCommand, kickCommand];
     try {
         console.log('Started refreshing application (/) commands.');
 
@@ -83,9 +84,19 @@ client.on('interactionCreate', (interaction) => {
     if (interaction.commandName === 'kopfoderzahl') {
         const random = Math.floor(Math.random() * 2);
         if (random == 0) {
-            interaction.reply({content: 'Kopf'});
+            interaction.reply({content: 'Die Münze landet auf Kopf'});
         } else {
-            interaction.reply({content: 'Zahl'});
+            interaction.reply({content: 'Die Münze landet auf Zahl'});
+        }
+    }
+    if (interaction.commandName === 'kick') {
+        if (interaction.member.permissions.has([PermissionsBitField.Flags.KickMembers])) {
+            const user = interaction.options.getUser('user');
+            const reason = interaction.options.getString('reason');
+            interaction.guild.members.kick(user.id, reason);
+            interaction.reply({content: `Der User ${user.username} wurde gekickt!\nGrund: ${reason}`, ephemeral: true});
+        } else {
+            interaction.reply({content: "Du hast nicht die Berechtigung, um diesen Command auszuführen!", ephemeral: true});
         }
     }
 });
