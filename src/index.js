@@ -2,8 +2,6 @@ const { Client, ActivityType, GatewayIntentBits, Collection, ActionRow, EmbedBui
 const { REST } = require('@discordjs/rest');
 require("dotenv").config()
 
-// TEST
-
 // Import all the commands
 const pingCommand = require("./commands/ping.js")
 const kopfoderzahlCommand = require("./commands/kopfoderzahl.js")
