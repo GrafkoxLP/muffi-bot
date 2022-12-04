@@ -73,6 +73,12 @@ async function registerCommands() {
         console.error(error);
     }
 }
+client.on("ready", () => {
+    console.log("List of guilds the bot is in:");
+    client.guilds.cache.forEach((guild) => {
+        console.log(" - " + guild.name);
+    });
+});
 
 
 
